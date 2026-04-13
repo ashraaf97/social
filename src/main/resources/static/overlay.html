@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Donation Overlay</title>
+    <style>
+        body { margin: 0; background: transparent; font-family: Arial, sans-serif; color: white; }
+        #popup { position: fixed; bottom: 40px; left: 40px; width: 420px; background: rgba(20,20,20,.85); border: 1px solid #666; border-radius: 12px; padding: 14px; display: none; }
+        #sender { font-weight: 700; font-size: 20px; margin-bottom: 6px; }
+        #amount { color: #7ee787; margin-bottom: 10px; font-size: 18px; }
+        #message { font-size: 16px; line-height: 1.4; }
+    </style>
+</head>
+<body>
+<div id="popup">
+    <div id="sender"></div>
+    <div id="amount"></div>
+    <div id="message"></div>
+</div>
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const streamerId = params.get("streamerId") || "streamer-demo";
+    let cursor = Number(params.get("cursor") || 0);
+    const queue = [];
+    const popup = document.getElementById("popup");
+
+    function showEvent(evt) {
+        document.getElementById("sender").textContent = evt.senderName;
+        document.getElementById("amount").textContent = `${evt.amount} ${evt.currency}`;
+        document.getElementById("message").textContent = evt.messageText;
+        popup.style.display = "block";
+        setTimeout(() => { popup.style.display = "none"; }, 5000);
+    }
+
+    async function poll() {
+        const response = await fetch(`/api/v1/overlay/events?streamerId=${encodeURIComponent(streamerId)}&cursor=${cursor}`);
+        if (!response.ok) return;
+        const data = await response.json();
+        cursor = data.nextCursor;
+        queue.push(...data.events);
+    }
+
+    setInterval(async () => {
+        try {
+            await poll();
+        } catch (e) {
+            // ignore transient errors for overlay resilience
+        }
+    }, 1500);
+
+    setInterval(() => {
+        if (popup.style.display === "none" && queue.length > 0) {
+            showEvent(queue.shift());
+        }
+    }, 500);
+</script>
+</body>
+</html>

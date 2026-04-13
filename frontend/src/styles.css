@@ -1,0 +1,48 @@
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #111;
+  color: #eee;
+}
+
+nav {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #333;
+}
+
+nav a {
+  color: #8ab4f8;
+}
+
+section {
+  padding: 16px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 440px;
+}
+
+input, textarea, button {
+  padding: 10px;
+}
+
+button {
+  cursor: pointer;
+}
+
+.overlayCard {
+  max-width: 420px;
+  border: 1px solid #555;
+  border-radius: 8px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.05);
+}
