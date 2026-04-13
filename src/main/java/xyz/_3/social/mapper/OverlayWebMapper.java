@@ -2,7 +2,7 @@ package xyz._3.social.mapper;
 
 import org.mapstruct.Mapper;
 import xyz._3.social.model.response.OverlayEventResponse;
-import xyz._3.social.overlay.domain.OverlayEvent;
+import xyz._3.social.model.OverlayEvent;
 
 @Mapper(componentModel = "spring")
 public interface OverlayWebMapper {

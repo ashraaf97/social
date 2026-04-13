@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import xyz._3.social.model.Donation;
-import xyz._3.social.overlay.domain.OverlayEvent;
+import xyz._3.social.model.OverlayEvent;
 import xyz._3.social.repository.OverlayEventRepository;
 
 @Service
