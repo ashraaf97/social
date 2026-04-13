@@ -11,9 +11,18 @@
 
 ## Backend stack
 
-- Spring Boot 4 + WebFlux
+- Spring Boot 4 + Spring MVC
 - Flyway migration in `src/main/resources/db/migration/V1__init_schema.sql`
-- H2 in-memory database
+- PostgreSQL (JDBC + Flyway)
+
+## Database setup (PostgreSQL)
+
+Start local database:
+
+- `docker compose up -d postgres`
+
+Default DB config is now PostgreSQL via `src/main/resources/application.properties`.
+You can override credentials/URLs with env vars from `.env.example`.
 
 ## Streamer auth (v1 placeholder)
 

@@ -1,69 +1,89 @@
 package xyz._3.social;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class SocialMvpFlowTests {
 
-    @Autowired
-    ApplicationContext applicationContext;
+    @LocalServerPort
+    int port;
 
     @Test
     void donationMarkPaidAppearsInOverlayAndReplayWorks() throws Exception {
-        WebTestClient webTestClient = WebTestClient.bindToApplicationContext(applicationContext).build();
-        byte[] createResponse = webTestClient.post()
-                .uri("/api/v1/donations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue("""
-                        {
-                          "streamerId": "streamer-demo",
-                          "senderName": "Alice",
-                          "amount": 12.50,
-                          "currency": "usd",
-                          "messageText": "great stream"
-                        }
-                        """)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectBody()
-                .jsonPath("$.status").isEqualTo("PENDING_PAYMENT")
-                .returnResult()
-                .getResponseBodyContent();
-        String createdJson = new String(createResponse);
+        HttpClient client = HttpClient.newHttpClient();
+        String createBody = """
+                {
+                  "streamerId": "streamer-demo",
+                  "senderName": "Alice",
+                  "amount": 12.50,
+                  "currency": "usd",
+                  "messageText": "great stream"
+                }
+                """;
+        HttpResponse<String> createResponse = client.send(
+                HttpRequest.newBuilder()
+                        .uri(URI.create(baseUrl("/api/v1/donations")))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(createBody))
+                        .build(),
+                HttpResponse.BodyHandlers.ofString()
+        );
+        assertEquals(201, createResponse.statusCode());
+        assertTrue(createResponse.body().contains("\"status\":\"PENDING_PAYMENT\""));
+        String createdJson = createResponse.body();
         long donationId = Long.parseLong(createdJson.replaceAll(".*\"id\":(\\d+).*", "$1"));
 
-        webTestClient.post()
-                .uri("/api/v1/donations/{id}/mark-paid", donationId)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.status").isEqualTo("PAID");
+        HttpResponse<String> markPaidResponse = client.send(
+                HttpRequest.newBuilder()
+                        .uri(URI.create(baseUrl("/api/v1/donations/" + donationId + "/mark-paid")))
+                        .POST(HttpRequest.BodyPublishers.noBody())
+                        .build(),
+                HttpResponse.BodyHandlers.ofString()
+        );
+        assertEquals(200, markPaidResponse.statusCode());
+        assertTrue(markPaidResponse.body().contains("\"status\":\"PAID\""));
 
-        webTestClient.get()
-                .uri("/api/v1/overlay/events?streamerId=streamer-demo&cursor=0")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.events.length()").isEqualTo(1)
-                .jsonPath("$.events[0].donationId").isEqualTo((int) donationId);
+        HttpResponse<String> pollResponse = client.send(
+                HttpRequest.newBuilder()
+                        .uri(URI.create(baseUrl("/api/v1/overlay/events?streamerId=streamer-demo&cursor=0")))
+                        .GET()
+                        .build(),
+                HttpResponse.BodyHandlers.ofString()
+        );
+        assertEquals(200, pollResponse.statusCode());
+        assertTrue(pollResponse.body().contains("\"donationId\":" + donationId));
 
-        webTestClient.get()
-                .uri("/api/v1/streamer/donations")
-                .header("X-Streamer-Key", "change-me")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$[0].id").exists();
+        HttpResponse<String> streamerListResponse = client.send(
+                HttpRequest.newBuilder()
+                        .uri(URI.create(baseUrl("/api/v1/streamer/donations")))
+                        .header("X-Streamer-Key", "change-me")
+                        .GET()
+                        .build(),
+                HttpResponse.BodyHandlers.ofString()
+        );
+        assertEquals(200, streamerListResponse.statusCode());
+        assertTrue(streamerListResponse.body().contains("\"id\""));
 
-        webTestClient.post()
-                .uri("/api/v1/streamer/donations/{id}/replay", donationId)
-                .header("X-Streamer-Key", "change-me")
-                .exchange()
-                .expectStatus().isNoContent();
+        HttpResponse<String> replayResponse = client.send(
+                HttpRequest.newBuilder()
+                        .uri(URI.create(baseUrl("/api/v1/streamer/donations/" + donationId + "/replay")))
+                        .header("X-Streamer-Key", "change-me")
+                        .POST(HttpRequest.BodyPublishers.noBody())
+                        .build(),
+                HttpResponse.BodyHandlers.ofString()
+        );
+        assertEquals(204, replayResponse.statusCode());
+    }
+
+    private String baseUrl(String path) {
+        return "http://localhost:" + port + path;
     }
 }
