@@ -1,14 +1,15 @@
 package xyz._3.social;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class SocialMvpFlowTests {
@@ -19,6 +20,21 @@ class SocialMvpFlowTests {
     @Test
     void donationMarkPaidAppearsInOverlayAndReplayWorks() throws Exception {
         HttpClient client = HttpClient.newHttpClient();
+
+        String loginBody = """
+                {"username":"admin","password":"admin-test-pass"}
+                """;
+        HttpResponse<String> loginResponse = client.send(
+                HttpRequest.newBuilder()
+                        .uri(URI.create(baseUrl("/auth/login")))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(loginBody))
+                        .build(),
+                HttpResponse.BodyHandlers.ofString()
+        );
+        assertEquals(200, loginResponse.statusCode());
+        String token = loginResponse.body().replaceAll(".*\"token\":\"([^\"]+)\".*", "$1");
+
         String createBody = """
                 {
                   "streamerId": "streamer-demo",
@@ -38,8 +54,7 @@ class SocialMvpFlowTests {
         );
         assertEquals(201, createResponse.statusCode());
         assertTrue(createResponse.body().contains("\"status\":\"PENDING_PAYMENT\""));
-        String createdJson = createResponse.body();
-        long donationId = Long.parseLong(createdJson.replaceAll(".*\"id\":(\\d+).*", "$1"));
+        long donationId = Long.parseLong(createResponse.body().replaceAll(".*\"id\":(\\d+).*", "$1"));
 
         HttpResponse<String> markPaidResponse = client.send(
                 HttpRequest.newBuilder()
@@ -63,8 +78,8 @@ class SocialMvpFlowTests {
 
         HttpResponse<String> streamerListResponse = client.send(
                 HttpRequest.newBuilder()
-                        .uri(URI.create(baseUrl("/api/v1/streamer/donations")))
-                        .header("X-Streamer-Key", "change-me")
+                        .uri(URI.create(baseUrl("/api/v1/streamer/donations?streamerId=streamer-demo")))
+                        .header("Authorization", "Bearer " + token)
                         .GET()
                         .build(),
                 HttpResponse.BodyHandlers.ofString()
@@ -72,15 +87,37 @@ class SocialMvpFlowTests {
         assertEquals(200, streamerListResponse.statusCode());
         assertTrue(streamerListResponse.body().contains("\"id\""));
 
+        HttpResponse<String> summaryResponse = client.send(
+                HttpRequest.newBuilder()
+                        .uri(URI.create(baseUrl("/api/v1/streamer/donations/summary?streamerId=streamer-demo")))
+                        .header("Authorization", "Bearer " + token)
+                        .GET()
+                        .build(),
+                HttpResponse.BodyHandlers.ofString()
+        );
+        assertEquals(200, summaryResponse.statusCode());
+        assertTrue(summaryResponse.body().contains("\"streamerId\":\"streamer-demo\""));
+        assertTrue(summaryResponse.body().contains("\"totalDonations\":1"));
+
         HttpResponse<String> replayResponse = client.send(
                 HttpRequest.newBuilder()
-                        .uri(URI.create(baseUrl("/api/v1/streamer/donations/" + donationId + "/replay")))
-                        .header("X-Streamer-Key", "change-me")
+                        .uri(URI.create(baseUrl("/api/v1/streamer/donations/" + donationId + "/replay?streamerId=streamer-demo")))
+                        .header("Authorization", "Bearer " + token)
                         .POST(HttpRequest.BodyPublishers.noBody())
                         .build(),
                 HttpResponse.BodyHandlers.ofString()
         );
         assertEquals(204, replayResponse.statusCode());
+
+        HttpResponse<String> adminStreamersResponse = client.send(
+                HttpRequest.newBuilder()
+                        .uri(URI.create(baseUrl("/api/v1/admin/streamers")))
+                        .header("Authorization", "Bearer " + token)
+                        .GET()
+                        .build(),
+                HttpResponse.BodyHandlers.ofString()
+        );
+        assertEquals(200, adminStreamersResponse.statusCode());
     }
 
     private String baseUrl(String path) {

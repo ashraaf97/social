@@ -1,10 +1,13 @@
 package xyz._3.social.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import xyz._3.social.exception.DonationNotFoundException;
 import xyz._3.social.model.Donation;
+import xyz._3.social.model.DonationStatus;
+import xyz._3.social.model.response.StreamerSummaryResponse;
 import xyz._3.social.repository.DonationRepository;
 
 @Service
@@ -26,6 +29,15 @@ public class StreamerPortalService {
         }
         int toIndex = Math.min(fromIndex + safeSize, donations.size());
         return donations.subList(fromIndex, toIndex);
+    }
+
+    public StreamerSummaryResponse getSummary(String streamerId) {
+        List<Donation> paid = donationRepository.findByStreamerIdOrderByCreatedAtDesc(streamerId)
+                .stream()
+                .filter(d -> d.status() == DonationStatus.PAID)
+                .toList();
+        BigDecimal total = paid.stream().map(Donation::amount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return new StreamerSummaryResponse(streamerId, paid.size(), total);
     }
 
     public void replayDonation(String streamerId, long donationId) {
