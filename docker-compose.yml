@@ -4,17 +4,42 @@ services:
     container_name: social-postgres
     environment:
       POSTGRES_DB: social
-      POSTGRES_USER: social
-      POSTGRES_PASSWORD: social
+      POSTGRES_USER: ${APP_DB_USER:-social}
+      POSTGRES_PASSWORD: ${APP_DB_PASSWORD:-social}
     ports:
       - "5432:5432"
     volumes:
       - social_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U social -d social"]
+      test: ["CMD-SHELL", "pg_isready -U ${APP_DB_USER:-social} -d social"]
       interval: 5s
       timeout: 5s
       retries: 10
+
+  backend:
+    build: .
+    container_name: social-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      APP_JDBC_URL: jdbc:postgresql://postgres:5432/social
+      APP_FLYWAY_URL: jdbc:postgresql://postgres:5432/social
+      APP_DB_USER: ${APP_DB_USER:-social}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:-social}
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-changeme-changeme-changeme-changeme}
+      APP_ADMIN_USERNAME: ${APP_ADMIN_USERNAME:-admin}
+      APP_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD:-admin-changeme}
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    container_name: social-frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
 
 volumes:
   social_postgres_data:
