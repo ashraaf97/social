@@ -22,17 +22,17 @@ public class DonationService {
     private final AiReaderService aiReaderService;
 
     public Donation createDonation(@Valid CreateDonationInput input) {
-        final String normalizedMessage = input.getMessageText().trim();
-        final String streamerId = input.getStreamerId().trim();
+        final String normalizedMessage = input.messageText().trim();
+        final String streamerId = input.streamerId().trim();
 
         return donationRepository.save(new Donation(
                 null,
                 streamerId,
-                input.getSenderName().trim(),
-                input.getAmount(),
-                input.getCurrency().trim().toUpperCase(),
+                input.senderName().trim(),
+                input.amount(),
+                input.currency().trim().toUpperCase(),
                 normalizedMessage,
-                input.getVoiceProfile(),
+                input.voiceProfile(),
                 TtsStatus.PENDING,
                 DonationStatus.PENDING_PAYMENT,
                 Instant.now()
