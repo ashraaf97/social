@@ -2,7 +2,7 @@ package xyz._3.social.service;
 
 import jakarta.validation.Valid;
 import java.time.Instant;
-import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -40,7 +40,7 @@ public class DonationService {
     }
 
     public Donation markPaid(long donationId) {
-        final Donation existing = requireDonation(donationId);
+        final Donation existing = findDonation(donationId);
         if (existing.status() == DonationStatus.PAID) {
             return existing;
         }
@@ -72,7 +72,7 @@ public class DonationService {
 
     /** FAILED → QUEUED: re-submits a failed job for retry. */
     public Donation retryFailedTts(long donationId) {
-        final Donation donation = requireDonation(donationId);
+        final Donation donation = findDonation(donationId);
         if (donation.ttsStatus() != TtsStatus.FAILED) {
             throw new IllegalStateException(
                     "Cannot retry TTS for donation %d: current status is %s".formatted(donationId, donation.ttsStatus()));
@@ -84,7 +84,7 @@ public class DonationService {
     }
 
     private Donation transitionTts(long donationId, TtsStatus expected, TtsStatus next) {
-        final Donation donation = requireDonation(donationId);
+        final Donation donation = findDonation(donationId);
         if (donation.ttsStatus() != expected) {
             throw new IllegalStateException(
                     "Cannot transition TTS for donation %d from %s to %s: current status is %s"
@@ -93,7 +93,7 @@ public class DonationService {
         return donationRepository.save(withTtsStatus(donation, next));
     }
 
-    private Donation requireDonation(long donationId) {
+    private Donation findDonation(long donationId) {
         return donationRepository.findById(donationId)
                 .orElseThrow(() -> new DonationNotFoundException(donationId));
     }

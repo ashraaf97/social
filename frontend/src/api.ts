@@ -1,17 +1,19 @@
-export type Donation = {
-  id: number;
-  senderName: string;
-  amount: number;
-  currency: string;
-  messageText: string;
-  status: string;
-  createdAt: string;
-};
+import type {
+  AuthResponse,
+  CreateDonationPayload,
+  Donation,
+  OverlayEvent,
+  OverlayPollResult,
+  StreamerProfile,
+} from "./models";
 
-export type AuthResponse = {
-  token: string;
-  role: string;
-  streamerId: string;
+export type {
+  AuthResponse,
+  CreateDonationPayload,
+  Donation,
+  OverlayEvent,
+  OverlayPollResult,
+  StreamerProfile,
 };
 
 const baseUrl = "";
@@ -39,14 +41,7 @@ export async function logout(token: string): Promise<void> {
   });
 }
 
-export async function createDonation(payload: {
-  streamerId?: string;
-  senderName: string;
-  amount: number;
-  currency: string;
-  messageText: string;
-  voiceProfile?: string;
-}) {
+export async function createDonation(payload: CreateDonationPayload): Promise<Donation> {
   const response = await fetch(`${baseUrl}/api/v1/donations`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -78,14 +73,6 @@ export async function replayDonation(donationId: number, token: string): Promise
   }
 }
 
-export type StreamerProfile = {
-  id: number;
-  username: string;
-  email: string | null;
-  streamerId: string;
-  createdAt: string;
-};
-
 export async function listStreamers(token: string): Promise<StreamerProfile[]> {
   const response = await fetch(`${baseUrl}/api/v1/admin/streamers`, {
     headers: bearer(token),
@@ -96,7 +83,7 @@ export async function listStreamers(token: string): Promise<StreamerProfile[]> {
   return response.json();
 }
 
-export async function pollOverlay(streamerId: string, cursor: number) {
+export async function pollOverlay(streamerId: string, cursor: number): Promise<OverlayPollResult> {
   const response = await fetch(
     `${baseUrl}/api/v1/overlay/events?streamerId=${encodeURIComponent(streamerId)}&cursor=${cursor}`
   );
@@ -104,4 +91,11 @@ export async function pollOverlay(streamerId: string, cursor: number) {
     throw new Error("Failed to poll overlay events");
   }
   return response.json();
+}
+
+export async function fetchTtsAudio(donationId: number): Promise<string | null> {
+  const response = await fetch(`${baseUrl}/api/v1/overlay/tts/${donationId}`);
+  if (!response.ok) return null;
+  const blob = await response.blob();
+  return URL.createObjectURL(blob);
 }

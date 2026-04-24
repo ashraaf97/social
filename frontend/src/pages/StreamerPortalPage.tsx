@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../AuthContext";
-import { Donation, listDonations, replayDonation } from "../api";
+import { listDonations, replayDonation } from "../api";
+import type { Donation } from "../models";
 
 export function StreamerPortalPage() {
   const { auth } = useAuth();

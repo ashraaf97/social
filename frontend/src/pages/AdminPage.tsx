@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../AuthContext";
-import { StreamerProfile, listStreamers } from "../api";
+import { listStreamers } from "../api";
+import type { StreamerProfile } from "../models";
 
 export function AdminPage() {
   const { auth } = useAuth();

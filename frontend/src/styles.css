@@ -47,6 +47,47 @@ button {
   background: rgba(255, 255, 255, 0.05);
 }
 
+/* animated donation card */
+.overlay-card {
+  max-width: 460px;
+  border-radius: 12px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #1e1e2e, #2a2a3e);
+  border: 1px solid #444;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateY(20px) scale(0.97);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+  min-height: 80px;
+}
+
+.overlay-card--visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.overlay-sender {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #8ab4f8;
+  margin-bottom: 4px;
+}
+
+.overlay-amount {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #4ade80;
+  margin-bottom: 8px;
+}
+
+.overlay-message {
+  font-size: 0.95rem;
+  color: #ccc;
+  line-height: 1.5;
+}
+
 /* login page */
 .login-page {
   display: flex;
