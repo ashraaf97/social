@@ -78,6 +78,24 @@ export async function replayDonation(donationId: number, token: string): Promise
   }
 }
 
+export type StreamerProfile = {
+  id: number;
+  username: string;
+  email: string | null;
+  streamerId: string;
+  createdAt: string;
+};
+
+export async function listStreamers(token: string): Promise<StreamerProfile[]> {
+  const response = await fetch(`${baseUrl}/api/v1/admin/streamers`, {
+    headers: bearer(token),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to load streamers");
+  }
+  return response.json();
+}
+
 export async function pollOverlay(streamerId: string, cursor: number) {
   const response = await fetch(
     `${baseUrl}/api/v1/overlay/events?streamerId=${encodeURIComponent(streamerId)}&cursor=${cursor}`

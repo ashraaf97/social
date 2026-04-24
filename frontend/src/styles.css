@@ -104,7 +104,14 @@ button {
   margin: 0;
 }
 
-/* nav logout */
+/* nav logout / username */
+.nav-username {
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: #aaa;
+  align-self: center;
+}
+
 .nav-logout {
   background: transparent;
   border: 1px solid #555;
@@ -112,5 +119,81 @@ button {
   border-radius: 6px;
   padding: 4px 12px;
   font-size: 0.85rem;
-  margin-left: auto;
+}
+
+/* login role tabs */
+.role-tabs {
+  display: flex;
+  border: 1px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.role-tab {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  color: #aaa;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.role-tab:hover {
+  background: #2a2a2a;
+}
+
+.role-tab--active {
+  background: #3b82f6;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* admin table */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.page-header h1 {
+  margin: 0;
+}
+
+.status-text {
+  color: #aaa;
+  font-size: 0.875rem;
+  margin: 0 0 16px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.admin-table th {
+  color: #aaa;
+  font-weight: 600;
+  background: #1a1a1a;
+}
+
+.admin-table tr:hover td {
+  background: #1a1a1a;
+}
+
+.empty-row {
+  text-align: center;
+  color: #555;
+  padding: 24px !important;
 }
