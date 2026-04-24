@@ -15,8 +15,8 @@ import xyz._3.social.model.User;
 import xyz._3.social.model.request.LoginRequest;
 import xyz._3.social.model.request.SignUpRequest;
 import xyz._3.social.model.response.AuthResponse;
+import xyz._3.social.service.ActiveTokenService;
 import xyz._3.social.service.JwtService;
-import xyz._3.social.service.TokenBlacklistService;
 import xyz._3.social.service.UserService;
 
 @AllArgsConstructor
@@ -27,13 +27,13 @@ public class AuthController {
     private final UserService userService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final TokenBlacklistService tokenBlacklistService;
+    private final ActiveTokenService activeTokenService;
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public AuthResponse signup(@RequestBody @Valid SignUpRequest request) {
-        User user = userService.signUp(request);
-        return new AuthResponse(jwtService.generateToken(user), user.role(), user.streamerId());
+        final User user = userService.signUp(request);
+        return issueToken(user);
     }
 
     @PostMapping("/login")
@@ -41,16 +41,25 @@ public class AuthController {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.username(), request.password())
         );
-        User user = userService.findByUsername(request.username());
-        return new AuthResponse(jwtService.generateToken(user), user.role(), user.streamerId());
+        final User user = userService.findByUsername(request.username());
+        return issueToken(user);
     }
 
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(@RequestHeader("Authorization") String authHeader) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            final String token = authHeader.substring(7);
-            tokenBlacklistService.blacklist(token, jwtService.extractExpiration(token));
+            activeTokenService.revoke(jwtService.extractJti(authHeader.substring(7)));
         }
+    }
+
+    private AuthResponse issueToken(User user) {
+        final String token = jwtService.generateToken(user);
+        activeTokenService.register(
+                jwtService.extractJti(token),
+                user.username(),
+                jwtService.extractExpiration(token)
+        );
+        return new AuthResponse(token, user.role(), user.streamerId());
     }
 }

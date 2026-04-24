@@ -7,6 +7,7 @@ import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 import javax.crypto.SecretKey;
 import org.springframework.stereotype.Service;
 import xyz._3.social.config.JwtProperties;
@@ -29,6 +30,7 @@ public class JwtService {
 
     public String generateToken(User user) {
         return Jwts.builder()
+                .id(UUID.randomUUID().toString())
                 .subject(user.username())
                 .claim(CLAIM_ROLE, user.role().name())
                 .claim(CLAIM_STREAMER_ID, user.streamerId())
@@ -36,6 +38,10 @@ public class JwtService {
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key)
                 .compact();
+    }
+
+    public String extractJti(String token) {
+        return parseClaims(token).getId();
     }
 
     public String extractUsername(String token) {
