@@ -1,10 +1,11 @@
 package xyz._3.social.service;
 
+import jakarta.validation.Valid;
 import java.time.Instant;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import xyz._3.social.config.StreamerProperties;
+import org.springframework.validation.annotation.Validated;
 import xyz._3.social.exception.DonationNotFoundException;
 import xyz._3.social.model.request.CreateDonationInput;
 import xyz._3.social.model.Donation;
@@ -12,19 +13,17 @@ import xyz._3.social.model.DonationStatus;
 import xyz._3.social.model.TtsStatus;
 import xyz._3.social.repository.DonationRepository;
 
+@Validated
 @AllArgsConstructor
 @Service
 public class DonationService {
     private final DonationRepository donationRepository;
     private final OverlayService overlayService;
     private final AiReaderService aiReaderService;
-    private final StreamerProperties streamerProperties;
 
-    public Donation createDonation(CreateDonationInput input) {
+    public Donation createDonation(@Valid CreateDonationInput input) {
         final String normalizedMessage = input.getMessageText().trim();
-        final String streamerId = input.getStreamerId() == null || input.getStreamerId().isBlank()
-                ? streamerProperties.defaultId()
-                : input.getStreamerId().trim();
+        final String streamerId = input.getStreamerId().trim();
 
         return donationRepository.save(new Donation(
                 null,
