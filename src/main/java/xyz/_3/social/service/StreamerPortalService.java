@@ -3,6 +3,8 @@ package xyz._3.social.service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import xyz._3.social.exception.DonationNotFoundException;
 import xyz._3.social.model.Donation;
@@ -10,15 +12,11 @@ import xyz._3.social.model.DonationStatus;
 import xyz._3.social.model.response.StreamerSummaryResponse;
 import xyz._3.social.repository.DonationRepository;
 
+@RequiredArgsConstructor
 @Service
 public class StreamerPortalService {
     private final DonationRepository donationRepository;
     private final OverlayService overlayService;
-
-    public StreamerPortalService(DonationRepository donationRepository, OverlayService overlayService) {
-        this.donationRepository = donationRepository;
-        this.overlayService = overlayService;
-    }
 
     public List<Donation> listDonations(String streamerId, int page, int size) {
         List<Donation> donations = donationRepository.findByStreamerIdOrderByCreatedAtDesc(streamerId);

@@ -2,6 +2,8 @@ package xyz._3.social.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,18 +20,13 @@ import xyz._3.social.model.response.StreamerSummaryResponse;
 import xyz._3.social.security.AuthenticatedUser;
 import xyz._3.social.service.StreamerPortalService;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/streamer")
 public class StreamerPortalController {
 
     private final StreamerPortalService streamerPortalService;
     private final StreamerWebMapper streamerWebMapper;
-
-    public StreamerPortalController(StreamerPortalService streamerPortalService,
-            StreamerWebMapper streamerWebMapper) {
-        this.streamerPortalService = streamerPortalService;
-        this.streamerWebMapper = streamerWebMapper;
-    }
 
     @GetMapping("/donations")
     public List<StreamerDonationResponse> listDonations(

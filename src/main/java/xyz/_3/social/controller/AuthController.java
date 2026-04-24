@@ -1,6 +1,8 @@
 package xyz._3.social.controller;
 
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +18,7 @@ import xyz._3.social.model.response.AuthResponse;
 import xyz._3.social.service.JwtService;
 import xyz._3.social.service.UserService;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -23,13 +26,6 @@ public class AuthController {
     private final UserService userService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-
-    public AuthController(UserService userService, JwtService jwtService,
-            AuthenticationManager authenticationManager) {
-        this.userService = userService;
-        this.jwtService = jwtService;
-        this.authenticationManager = authenticationManager;
-    }
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)

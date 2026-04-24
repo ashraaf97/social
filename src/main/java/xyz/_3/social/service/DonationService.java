@@ -2,6 +2,8 @@ package xyz._3.social.service;
 
 import java.time.Instant;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import xyz._3.social.config.StreamerProperties;
 import xyz._3.social.exception.DonationNotFoundException;
@@ -11,24 +13,13 @@ import xyz._3.social.model.DonationStatus;
 import xyz._3.social.model.TtsStatus;
 import xyz._3.social.repository.DonationRepository;
 
+@RequiredArgsConstructor
 @Service
 public class DonationService {
     private final DonationRepository donationRepository;
     private final OverlayService overlayService;
     private final AiReaderService aiReaderService;
     private final StreamerProperties streamerProperties;
-
-    public DonationService(
-            DonationRepository donationRepository,
-            OverlayService overlayService,
-            AiReaderService aiReaderService,
-            StreamerProperties streamerProperties
-    ) {
-        this.donationRepository = donationRepository;
-        this.overlayService = overlayService;
-        this.aiReaderService = aiReaderService;
-        this.streamerProperties = streamerProperties;
-    }
 
     public Donation createDonation(CreateDonationInput input) {
         String normalizedMessage = input.getMessageText().trim();

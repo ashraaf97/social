@@ -1,6 +1,8 @@
 package xyz._3.social.controller;
 
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,16 +15,12 @@ import xyz._3.social.model.response.DonationResponse;
 import xyz._3.social.mapper.DonationWebMapper;
 import xyz._3.social.service.DonationService;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/donations")
 public class DonationController {
     private final DonationService donationService;
     private final DonationWebMapper donationWebMapper;
-
-    public DonationController(DonationService donationService, DonationWebMapper donationWebMapper) {
-        this.donationService = donationService;
-        this.donationWebMapper = donationWebMapper;
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

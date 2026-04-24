@@ -1,6 +1,8 @@
 package xyz._3.social.controller;
 
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -10,16 +12,12 @@ import xyz._3.social.model.response.OverlayPollResponse;
 import xyz._3.social.mapper.OverlayWebMapper;
 import xyz._3.social.service.OverlayService;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/overlay")
 public class OverlayController {
     private final OverlayService overlayService;
     private final OverlayWebMapper overlayWebMapper;
-
-    public OverlayController(OverlayService overlayService, OverlayWebMapper overlayWebMapper) {
-        this.overlayService = overlayService;
-        this.overlayWebMapper = overlayWebMapper;
-    }
 
     @GetMapping("/events")
     public OverlayPollResponse poll(

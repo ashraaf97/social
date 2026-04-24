@@ -2,11 +2,14 @@ package xyz._3.social.service;
 
 import java.time.Instant;
 import java.util.List;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import xyz._3.social.config.AdminProperties;
@@ -16,19 +19,13 @@ import xyz._3.social.model.request.SignUpRequest;
 import xyz._3.social.model.response.StreamerProfileResponse;
 import xyz._3.social.repository.UserRepository;
 
+@RequiredArgsConstructor
 @Service
 public class UserService implements UserDetailsService, ApplicationRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AdminProperties adminProperties;
-
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-            AdminProperties adminProperties) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.adminProperties = adminProperties;
-    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
