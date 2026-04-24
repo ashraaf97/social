@@ -35,6 +35,23 @@ input, textarea, button {
   padding: 10px;
 }
 
+.amount-row {
+  display: flex;
+  gap: 8px;
+}
+
+.amount-row input {
+  flex: 1;
+}
+
+.currency-input {
+  width: 72px;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 1px;
+  flex: 0 0 72px !important;
+}
+
 button {
   cursor: pointer;
 }
