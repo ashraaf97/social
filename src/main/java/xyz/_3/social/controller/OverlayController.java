@@ -2,22 +2,26 @@ package xyz._3.social.controller;
 
 import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import xyz._3.social.mapper.OverlayWebMapper;
 import xyz._3.social.model.response.OverlayEventResponse;
 import xyz._3.social.model.response.OverlayPollResponse;
-import xyz._3.social.mapper.OverlayWebMapper;
+import xyz._3.social.repository.TtsAudioRepository;
 import xyz._3.social.service.OverlayService;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/overlay")
 public class OverlayController {
     private final OverlayService overlayService;
     private final OverlayWebMapper overlayWebMapper;
+    private final TtsAudioRepository ttsAudioRepository;
 
     @GetMapping("/events")
     public OverlayPollResponse poll(
@@ -31,6 +35,15 @@ public class OverlayController {
                 .map(overlayWebMapper::toOverlayEventResponse)
                 .toList();
         return toResponse(cursor, events);
+    }
+
+    @GetMapping(value = "/tts/{donationId}", produces = "audio/mpeg")
+    public ResponseEntity<byte[]> getTtsAudio(@PathVariable long donationId) {
+        return ttsAudioRepository.findById(donationId)
+                .map(audio -> ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType("audio/mpeg"))
+                        .body(audio.audioData()))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     private OverlayPollResponse toResponse(long currentCursor, List<OverlayEventResponse> events) {
