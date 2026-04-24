@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Date;
 import javax.crypto.SecretKey;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,10 @@ public class JwtService {
 
     public String extractStreamerId(String token) {
         return parseClaims(token).get(CLAIM_STREAMER_ID, String.class);
+    }
+
+    public Instant extractExpiration(String token) {
+        return parseClaims(token).getExpiration().toInstant();
     }
 
     public boolean isTokenValid(String token) {

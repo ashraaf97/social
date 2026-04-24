@@ -2,25 +2,25 @@ package xyz._3.social.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import lombok.AllArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
-
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import xyz._3.social.service.JwtService;
+import xyz._3.social.service.TokenBlacklistService;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -31,7 +31,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
         final String token = authHeader.substring(7);
-        if (jwtService.isTokenValid(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (!tokenBlacklistService.isBlacklisted(token) && jwtService.isTokenValid(token)
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
             final String username = jwtService.extractUsername(token);
             final var role = jwtService.extractRole(token);
             final String streamerId = jwtService.extractStreamerId(token);

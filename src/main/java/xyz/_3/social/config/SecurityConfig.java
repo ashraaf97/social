@@ -45,7 +45,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/auth/signup", "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/signup", "/auth/login", "/auth/logout").permitAll()
                         .requestMatchers("/api/v1/overlay/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/donations").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/donations/*/mark-paid").permitAll()
