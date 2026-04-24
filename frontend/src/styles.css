@@ -46,3 +46,71 @@ button {
   padding: 14px;
   background: rgba(255, 255, 255, 0.05);
 }
+
+/* login page */
+.login-page {
+  display: flex;
+  justify-content: center;
+  padding-top: 80px;
+}
+
+.login-card {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 32px;
+  width: 100%;
+  max-width: 380px;
+}
+
+.login-card h1 {
+  margin: 0 0 24px;
+  font-size: 1.4rem;
+  text-align: center;
+}
+
+.login-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.login-card input {
+  background: #111;
+  border: 1px solid #444;
+  color: #eee;
+  border-radius: 6px;
+}
+
+.login-card button[type="submit"] {
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-top: 8px;
+}
+
+.login-card button[type="submit"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #f87171;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* nav logout */
+.nav-logout {
+  background: transparent;
+  border: 1px solid #555;
+  color: #f87171;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  margin-left: auto;
+}
