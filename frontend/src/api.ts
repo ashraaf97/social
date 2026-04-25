@@ -4,6 +4,7 @@ import type {
   Donation,
   OverlayEvent,
   OverlayPollResult,
+  PageResponse,
   StreamerProfile,
 } from "./models";
 
@@ -13,6 +14,7 @@ export type {
   Donation,
   OverlayEvent,
   OverlayPollResult,
+  PageResponse,
   StreamerProfile,
 };
 
@@ -73,10 +75,15 @@ export async function replayDonation(donationId: number, token: string): Promise
   }
 }
 
-export async function listStreamers(token: string): Promise<StreamerProfile[]> {
-  const response = await fetch(`${baseUrl}/api/v1/admin/streamers`, {
-    headers: bearer(token),
-  });
+export async function listStreamers(
+  token: string,
+  page: number,
+  size: number
+): Promise<PageResponse<StreamerProfile>> {
+  const response = await fetch(
+    `${baseUrl}/api/v1/admin/streamers?page=${page}&size=${size}`,
+    { headers: bearer(token) }
+  );
   if (!response.ok) {
     throw new Error("Failed to load streamers");
   }

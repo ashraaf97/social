@@ -1,21 +1,22 @@
 package xyz._3.social.service;
 
 import java.time.Instant;
-import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import xyz._3.social.config.AdminProperties;
 import xyz._3.social.model.User;
 import xyz._3.social.model.UserRole;
 import xyz._3.social.model.request.SignUpRequest;
+import xyz._3.social.model.response.PageResponse;
 import xyz._3.social.model.response.StreamerProfileResponse;
 import xyz._3.social.repository.UserRepository;
 
@@ -59,10 +60,12 @@ public class UserService implements UserDetailsService, ApplicationRunner {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 
-    public List<StreamerProfileResponse> findAllStreamers() {
-        return userRepository.findByRole(UserRole.STREAMER).stream()
-                .map(u -> new StreamerProfileResponse(u.id(), u.username(), u.email(), u.streamerId(), u.createdAt()))
-                .toList();
+    public PageResponse<StreamerProfileResponse> findAllStreamers(int page, int size) {
+        final var pageable = PageRequest.of(page, size, Sort.by("created_at").descending());
+        return PageResponse.of(
+                userRepository.findByRole(UserRole.STREAMER, pageable)
+                        .map(u -> new StreamerProfileResponse(u.id(), u.username(), u.email(), u.streamerId(), u.createdAt()))
+        );
     }
 
     @Override

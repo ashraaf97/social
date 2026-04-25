@@ -1,32 +1,40 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../AuthContext";
 import { listStreamers } from "../api";
-import type { StreamerProfile } from "../models";
+import type { PageResponse, StreamerProfile } from "../models";
+
+const PAGE_SIZE = 20;
 
 export function AdminPage() {
   const { auth } = useAuth();
-  const [streamers, setStreamers] = useState<StreamerProfile[]>([]);
+  const [page, setPage] = useState(0);
+  const [result, setResult] = useState<PageResponse<StreamerProfile> | null>(null);
   const [status, setStatus] = useState("");
 
-  async function load() {
-    try {
-      const result = await listStreamers(auth!.token);
-      setStreamers(result);
-      setStatus(`${result.length} streamer${result.length !== 1 ? "s" : ""} registered`);
-    } catch {
-      setStatus("Failed to load streamers");
-    }
-  }
+  const load = useCallback(
+    async (p: number) => {
+      try {
+        const data = await listStreamers(auth!.token, p, PAGE_SIZE);
+        setResult(data);
+        setStatus(`${data.totalElements} streamer${data.totalElements === 1 ? "" : "s"} registered`);
+      } catch {
+        setStatus("Failed to load streamers");
+      }
+    },
+    [auth]
+  );
 
   useEffect(() => {
-    void load();
-  }, []);
+    void load(page);
+  }, [load, page]);
+
+  const streamers = result?.content ?? [];
 
   return (
     <section>
       <div className="page-header">
         <h1>Admin Portal</h1>
-        <button onClick={load}>Refresh</button>
+        <button onClick={() => void load(page)}>Refresh</button>
       </div>
       <p className="status-text">{status}</p>
       <table className="admin-table">
@@ -56,6 +64,23 @@ export function AdminPage() {
           )}
         </tbody>
       </table>
+      {result && result.totalPages > 1 && (
+        <div className="pagination">
+          <button
+            disabled={!result.hasPrevious}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            Previous
+          </button>
+          <span>Page {result.page + 1} of {result.totalPages}</span>
+          <button
+            disabled={!result.hasNext}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </section>
   );
 }

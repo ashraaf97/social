@@ -255,3 +255,31 @@ button {
   color: #555;
   padding: 24px !important;
 }
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  justify-content: flex-end;
+}
+
+.pagination button {
+  padding: 6px 14px;
+  background: #1e1e2e;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.pagination button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.pagination span {
+  color: #aaa;
+  font-size: 0.85rem;
+}
