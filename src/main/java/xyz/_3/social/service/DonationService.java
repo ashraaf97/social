@@ -41,7 +41,7 @@ public class DonationService {
 
     public Donation markPaid(long donationId) {
         final Donation existing = findDonation(donationId);
-        if (existing.status() == DonationStatus.PAID) {
+        if (existing.getStatus() == DonationStatus.PAID) {
             return existing;
         }
 
@@ -73,9 +73,9 @@ public class DonationService {
     /** FAILED → QUEUED: re-submits a failed job for retry. */
     public Donation retryFailedTts(long donationId) {
         final Donation donation = findDonation(donationId);
-        if (donation.ttsStatus() != TtsStatus.FAILED) {
+        if (donation.getTtsStatus() != TtsStatus.FAILED) {
             throw new IllegalStateException(
-                    "Cannot retry TTS for donation %d: current status is %s".formatted(donationId, donation.ttsStatus()));
+                    "Cannot retry TTS for donation %d: current status is %s".formatted(donationId, donation.getTtsStatus()));
         }
         final Donation requeued = donationRepository.save(withTtsStatus(donation, TtsStatus.QUEUED));
         aiReaderService.queueForReading(requeued,
@@ -85,10 +85,10 @@ public class DonationService {
 
     private Donation transitionTts(long donationId, TtsStatus expected, TtsStatus next) {
         final Donation donation = findDonation(donationId);
-        if (donation.ttsStatus() != expected) {
+        if (donation.getTtsStatus() != expected) {
             throw new IllegalStateException(
                     "Cannot transition TTS for donation %d from %s to %s: current status is %s"
-                            .formatted(donationId, expected, next, donation.ttsStatus()));
+                            .formatted(donationId, expected, next, donation.getTtsStatus()));
         }
         return donationRepository.save(withTtsStatus(donation, next));
     }
@@ -99,12 +99,12 @@ public class DonationService {
     }
 
     private static Donation withStatus(Donation d, DonationStatus status) {
-        return new Donation(d.id(), d.streamerId(), d.senderName(), d.amount(), d.currency(),
-                d.messageText(), d.voiceProfile(), d.ttsStatus(), status, d.createdAt());
+        return new Donation(d.getId(), d.getStreamerId(), d.getSenderName(), d.getAmount(), d.getCurrency(),
+                d.getMessageText(), d.getVoiceProfile(), d.getTtsStatus(), status, d.getCreatedAt());
     }
 
     private static Donation withTtsStatus(Donation d, TtsStatus ttsStatus) {
-        return new Donation(d.id(), d.streamerId(), d.senderName(), d.amount(), d.currency(),
-                d.messageText(), d.voiceProfile(), ttsStatus, d.status(), d.createdAt());
+        return new Donation(d.getId(), d.getStreamerId(), d.getSenderName(), d.getAmount(), d.getCurrency(),
+                d.getMessageText(), d.getVoiceProfile(), ttsStatus, d.getStatus(), d.getCreatedAt());
     }
 }

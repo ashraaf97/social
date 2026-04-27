@@ -31,9 +31,9 @@ public class JwtService {
     public String generateToken(User user) {
         return Jwts.builder()
                 .id(UUID.randomUUID().toString())
-                .subject(user.username())
-                .claim(CLAIM_ROLE, user.role().name())
-                .claim(CLAIM_STREAMER_ID, user.streamerId())
+                .subject(user.getUsername())
+                .claim(CLAIM_ROLE, user.getRole().name())
+                .claim(CLAIM_STREAMER_ID, user.getStreamerId())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key)

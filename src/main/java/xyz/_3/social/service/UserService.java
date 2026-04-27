@@ -33,9 +33,9 @@ public class UserService implements UserDetailsService, ApplicationRunner {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
         return org.springframework.security.core.userdetails.User.builder()
-                .username(user.username())
-                .password(user.passwordHash())
-                .roles(user.role().name())
+                .username(user.getUsername())
+                .password(user.getPasswordHash())
+                .roles(user.getRole().name())
                 .build();
     }
 
@@ -61,10 +61,10 @@ public class UserService implements UserDetailsService, ApplicationRunner {
     }
 
     public PageResponse<StreamerProfileResponse> findAllStreamers(int page, int size) {
-        final var pageable = PageRequest.of(page, size, Sort.by("created_at").descending());
+        final var pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return PageResponse.of(
                 userRepository.findByRole(UserRole.STREAMER, pageable)
-                        .map(u -> new StreamerProfileResponse(u.id(), u.username(), u.email(), u.streamerId(), u.createdAt()))
+                        .map(u -> new StreamerProfileResponse(u.getId(), u.getUsername(), u.getEmail(), u.getStreamerId(), u.getCreatedAt()))
         );
     }
 

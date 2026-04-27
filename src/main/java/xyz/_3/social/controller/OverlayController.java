@@ -42,7 +42,7 @@ public class OverlayController {
         return ttsAudioRepository.findById(donationId)
                 .map(audio -> ResponseEntity.ok()
                         .contentType(MediaType.parseMediaType("audio/mpeg"))
-                        .body(audio.audioData()))
+                        .body(audio.getAudioData()))
                 .orElse(ResponseEntity.notFound().build());
     }
 

@@ -27,20 +27,20 @@ public class ElevenLabsAiReaderService implements AiReaderService {
         try {
             final TextToSpeechPrompt prompt = buildPrompt(donation);
             final byte[] audio = ttsModel.call(prompt).getResult().getOutput();
-            ttsAudioRepository.save(new TtsAudio(donation.id(), audio, Instant.now()));
+            ttsAudioRepository.save(new TtsAudio(donation.getId(), audio, Instant.now()));
             statusUpdater.accept(TtsStatus.COMPLETED);
-            log.info("TTS completed for donation {}", donation.id());
+            log.info("TTS completed for donation {}", donation.getId());
         } catch (Exception e) {
-            log.error("TTS failed for donation {}: {}", donation.id(), e.getMessage(), e);
+            log.error("TTS failed for donation {}: {}", donation.getId(), e.getMessage(), e);
             statusUpdater.accept(TtsStatus.FAILED);
         }
     }
 
     private TextToSpeechPrompt buildPrompt(Donation donation) {
         final String text = buildSpeechText(donation);
-        if (donation.voiceProfile() != null && !donation.voiceProfile().isBlank()) {
+        if (donation.getVoiceProfile() != null && !donation.getVoiceProfile().isBlank()) {
             final ElevenLabsTextToSpeechOptions options = ElevenLabsTextToSpeechOptions.builder()
-                    .voiceId(donation.voiceProfile())
+                    .voiceId(donation.getVoiceProfile())
                     .build();
             return new TextToSpeechPrompt(text, options);
         }
@@ -49,10 +49,10 @@ public class ElevenLabsAiReaderService implements AiReaderService {
 
     private static String buildSpeechText(Donation donation) {
         return "%s donated %s %s and says: %s".formatted(
-                donation.senderName(),
-                donation.amount().toPlainString(),
-                donation.currency(),
-                donation.messageText()
+                donation.getSenderName(),
+                donation.getAmount().toPlainString(),
+                donation.getCurrency(),
+                donation.getMessageText()
         );
     }
 }

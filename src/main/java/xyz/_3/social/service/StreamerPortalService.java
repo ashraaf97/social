@@ -3,7 +3,6 @@ package xyz._3.social.service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import xyz._3.social.exception.DonationNotFoundException;
@@ -32,15 +31,15 @@ public class StreamerPortalService {
     public StreamerSummaryResponse getSummary(String streamerId) {
         List<Donation> paid = donationRepository.findByStreamerIdOrderByCreatedAtDesc(streamerId)
                 .stream()
-                .filter(d -> d.status() == DonationStatus.PAID)
+                .filter(d -> d.getStatus() == DonationStatus.PAID)
                 .toList();
-        BigDecimal total = paid.stream().map(Donation::amount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal total = paid.stream().map(Donation::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
         return new StreamerSummaryResponse(streamerId, paid.size(), total);
     }
 
     public void replayDonation(String streamerId, long donationId) {
         Optional<Donation> donation = donationRepository.findById(donationId);
-        if (donation.isEmpty() || !donation.get().streamerId().equals(streamerId)) {
+        if (donation.isEmpty() || !donation.get().getStreamerId().equals(streamerId)) {
             throw new DonationNotFoundException(donationId);
         }
         overlayService.enqueueDonation(donation.get());

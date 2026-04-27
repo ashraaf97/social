@@ -2,7 +2,6 @@ package xyz._3.social.service;
 
 import java.time.Instant;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import xyz._3.social.model.Donation;
@@ -17,12 +16,12 @@ public class OverlayService {
     public OverlayEvent enqueueDonation(Donation donation) {
         OverlayEvent event = new OverlayEvent(
                 null,
-                donation.id(),
-                donation.streamerId(),
-                donation.senderName(),
-                donation.amount(),
-                donation.currency(),
-                donation.messageText(),
+                donation.getId(),
+                donation.getStreamerId(),
+                donation.getSenderName(),
+                donation.getAmount(),
+                donation.getCurrency(),
+                donation.getMessageText(),
                 Instant.now()
         );
         return overlayEventRepository.save(event);

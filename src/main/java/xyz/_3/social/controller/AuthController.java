@@ -57,9 +57,9 @@ public class AuthController {
         final String token = jwtService.generateToken(user);
         activeTokenService.register(
                 jwtService.extractJti(token),
-                user.username(),
+                user.getUsername(),
                 jwtService.extractExpiration(token)
         );
-        return new AuthResponse(token, user.role(), user.streamerId());
+        return new AuthResponse(token, user.getRole(), user.getStreamerId());
     }
 }
