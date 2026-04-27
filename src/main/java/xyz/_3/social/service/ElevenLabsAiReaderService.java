@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.audio.tts.TextToSpeechPrompt;
 import org.springframework.ai.elevenlabs.ElevenLabsTextToSpeechModel;
 import org.springframework.ai.elevenlabs.ElevenLabsTextToSpeechOptions;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import xyz._3.social.model.Donation;
 import xyz._3.social.model.TtsAudio;
@@ -16,6 +17,7 @@ import xyz._3.social.repository.TtsAudioRepository;
 @Slf4j
 @AllArgsConstructor
 @Service
+@ConditionalOnBean(ElevenLabsTextToSpeechModel.class)
 public class ElevenLabsAiReaderService implements AiReaderService {
 
     private final ElevenLabsTextToSpeechModel ttsModel;
