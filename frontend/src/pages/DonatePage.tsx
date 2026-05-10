@@ -11,7 +11,7 @@ export function DonatePage() {
 
   const [senderName, setSenderName] = useState("");
   const [amount, setAmount] = useState(5);
-  const [currency, setCurrency] = useState("USD");
+  const [currency, setCurrency] = useState("MYR");
   const [messageText, setMessageText] = useState("");
   const [status, setStatus] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -110,7 +110,7 @@ export function DonatePage() {
                 className="currency-input"
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value.toUpperCase())}
-                placeholder="USD"
+                placeholder="MYR"
                 maxLength={16}
                 required
               />

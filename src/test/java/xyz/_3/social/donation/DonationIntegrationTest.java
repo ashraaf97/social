@@ -90,7 +90,7 @@ class DonationIntegrationTest {
                 .andExpect(jsonPath("$.ttsStatus").value(TtsStatus.PENDING.name()))
                 .andExpect(jsonPath("$.streamerId").value(STREAMER_ID))
                 .andExpect(jsonPath("$.senderName").value("Alice"))
-                .andExpect(jsonPath("$.currency").value("USD"))
+                .andExpect(jsonPath("$.currency").value("MYR"))
                 .andExpect(jsonPath("$.messageText").value("great stream"))
                 .andReturn();
 
@@ -247,7 +247,7 @@ class DonationIntegrationTest {
                         STREAMER_ID,
                         senderName,
                         new BigDecimal("5.00"),
-                        "USD",
+                        "MYR",
                         message,
                         null
                 )

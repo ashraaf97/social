@@ -6,7 +6,7 @@ describe("createDonation", () => {
     streamerId: "streamer-1",
     senderName: "Alice",
     amount: 12.5,
-    currency: "USD",
+    currency: "MYR",
     messageText: "great stream",
   };
 
@@ -14,7 +14,7 @@ describe("createDonation", () => {
     id: 42,
     senderName: "Alice",
     amount: 12.5,
-    currency: "USD",
+    currency: "MYR",
     messageText: "great stream",
     status: "PENDING_PAYMENT",
     createdAt: "2026-04-27T00:00:00Z",

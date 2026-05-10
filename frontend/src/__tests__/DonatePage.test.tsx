@@ -18,7 +18,7 @@ async function fillForm({
   const amountInput = screen.getByRole("spinbutton");
   await user.clear(amountInput);
   await user.type(amountInput, amount);
-  const currencyInput = screen.getByPlaceholderText("USD");
+  const currencyInput = screen.getByPlaceholderText("MYR");
   await user.clear(currencyInput);
   await user.type(currencyInput, currency);
   await user.clear(screen.getByPlaceholderText("Message for streamer"));
@@ -40,7 +40,7 @@ describe("<DonatePage />", () => {
 
     expect(screen.getByRole("heading", { name: /send donation/i })).toBeInTheDocument();
     expect(screen.getByRole("spinbutton")).toHaveValue(5);
-    expect(screen.getByPlaceholderText("USD")).toHaveValue("USD");
+    expect(screen.getByPlaceholderText("MYR")).toHaveValue("MYR");
     expect(screen.getByRole("button", { name: /donate/i })).toBeInTheDocument();
   });
 
@@ -48,7 +48,7 @@ describe("<DonatePage />", () => {
     const user = userEvent.setup();
     render(<DonatePage />);
 
-    const currencyInput = screen.getByPlaceholderText("USD") as HTMLInputElement;
+    const currencyInput = screen.getByPlaceholderText("MYR") as HTMLInputElement;
     await user.clear(currencyInput);
     await user.type(currencyInput, "eur");
 
