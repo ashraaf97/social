@@ -54,13 +54,17 @@ export function OverlayPage() {
       try {
         const payload = await pollOverlay(token, 0);
         cursorRef.current = payload.nextCursor;
+        if (payload.events.length > 0) {
+          queueRef.current.push(...payload.events);
+        }
         initializedRef.current = true;
+        void processQueue();
       } catch {
         initializedRef.current = true;
       }
     }
     void initializeCursor();
-  }, [token]);
+  }, [token, processQueue]);
 
   const processQueue = useCallback(async () => {
     if (processingRef.current || queueRef.current.length === 0) return;

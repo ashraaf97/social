@@ -30,6 +30,9 @@ services:
       APP_JWT_SECRET: ${APP_JWT_SECRET:-changeme-changeme-changeme-changeme}
       APP_ADMIN_USERNAME: ${APP_ADMIN_USERNAME:-admin}
       APP_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD:-admin-changeme}
+      APP_ELEVENLABS_API_KEY: ${APP_ELEVENLABS_API_KEY:-}
+      APP_ELEVENLABS_VOICE_ID: ${APP_ELEVENLABS_VOICE_ID:-EXAVITQu4vr4xnSDxMaL}
+      APP_ELEVENLABS_MODEL_ID: ${APP_ELEVENLABS_MODEL_ID:-eleven_flash_v2_5}
     ports:
       - "8080:8080"
 
