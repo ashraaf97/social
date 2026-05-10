@@ -28,5 +28,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
     private String streamerId;
+    private String overlayToken;
+    private String donationToken;
     private Instant createdAt;
 }

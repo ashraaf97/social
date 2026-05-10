@@ -38,7 +38,13 @@ export function LoginPage() {
         );
         return;
       }
-      signIn({ token: res.token, streamerId: res.streamerId, role: res.role });
+      signIn({
+        token: res.token,
+        streamerId: res.streamerId,
+        overlayToken: res.overlayToken,
+        donationToken: res.donationToken,
+        role: res.role,
+      });
       navigate(ROLE_DESTINATIONS[selectedRole]);
     } catch {
       setError("Invalid username or password");

@@ -1,6 +1,8 @@
 package xyz._3.social.service;
 
+import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.Base64;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
@@ -27,6 +29,7 @@ public class UserService implements UserDetailsService, ApplicationRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AdminProperties adminProperties;
+    private final SecureRandom secureRandom = new SecureRandom();
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -50,9 +53,22 @@ public class UserService implements UserDetailsService, ApplicationRunner {
                 request.email(),
                 UserRole.STREAMER,
                 request.username(),
+                generateSecureToken(),
+                generateSecureToken(),
                 Instant.now()
         );
         return userRepository.save(user);
+    }
+
+    public User findByDonationToken(String donationToken) {
+        return userRepository.findByDonationToken(donationToken)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid donation token"));
+    }
+
+    private String generateSecureToken() {
+        final byte[] tokenBytes = new byte[32];
+        secureRandom.nextBytes(tokenBytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(tokenBytes);
     }
 
     public User findByUsername(String username) {
@@ -70,17 +86,44 @@ public class UserService implements UserDetailsService, ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        if (!userRepository.existsByUsername(adminProperties.username())) {
-            User admin = new User(
-                    null,
-                    adminProperties.username(),
-                    passwordEncoder.encode(adminProperties.password()),
-                    null,
-                    UserRole.ADMIN,
-                    null,
-                    Instant.now()
-            );
-            userRepository.save(admin);
+        seedAdmin();
+        seedSampleStreamer();
+    }
+
+    private void seedAdmin() {
+        if (userRepository.existsByUsername(adminProperties.username())) {
+            return;
         }
+        final User admin = new User(
+                null,
+                adminProperties.username(),
+                passwordEncoder.encode(adminProperties.password()),
+                null,
+                UserRole.ADMIN,
+                null,
+                null,
+                null,
+                Instant.now()
+        );
+        userRepository.save(admin);
+    }
+
+    private void seedSampleStreamer() {
+        final String username = "streamer1";
+        if (userRepository.existsByUsername(username)) {
+            return;
+        }
+        final User streamer = new User(
+                null,
+                username,
+                passwordEncoder.encode("streamer123"),
+                "streamer1@example.com",
+                UserRole.STREAMER,
+                username,
+                generateSecureToken(),
+                generateSecureToken(),
+                Instant.now()
+        );
+        userRepository.save(streamer);
     }
 }

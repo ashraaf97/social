@@ -5,7 +5,7 @@ import type { OverlayEvent } from "../models";
 const POLL_MS = 1500;
 const TTS_MAX_WAIT_MS = 12_000;
 const TTS_RETRY_MS = 1_000;
-const CARD_FALLBACK_MS = 5_000;
+const CARD_FALLBACK_MS = 7_000;
 const CARD_EXIT_MS = 400;
 
 async function waitForTtsAudio(donationId: number): Promise<string | null> {
@@ -32,14 +32,35 @@ function delay(ms: number) {
 }
 
 export function OverlayPage() {
-  const streamerId = new URLSearchParams(window.location.search).get("streamerId") ?? "streamer-demo";
+  const token = new URLSearchParams(window.location.search).get("token") ?? "";
 
   const cursorRef = useRef(0);
   const queueRef = useRef<OverlayEvent[]>([]);
   const processingRef = useRef(false);
+  const initializedRef = useRef(false);
 
   const [current, setCurrent] = useState<OverlayEvent | null>(null);
   const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    document.body.classList.add("overlay-mode");
+    return () => {
+      document.body.classList.remove("overlay-mode");
+    };
+  }, []);
+
+  useEffect(() => {
+    async function initializeCursor() {
+      try {
+        const payload = await pollOverlay(token, 0);
+        cursorRef.current = payload.nextCursor;
+        initializedRef.current = true;
+      } catch {
+        initializedRef.current = true;
+      }
+    }
+    void initializeCursor();
+  }, [token]);
 
   const processQueue = useCallback(async () => {
     if (processingRef.current || queueRef.current.length === 0) return;
@@ -70,8 +91,10 @@ export function OverlayPage() {
 
   useEffect(() => {
     const timer = window.setInterval(async () => {
+      if (!initializedRef.current) return;
+      
       try {
-        const payload = await pollOverlay(streamerId, cursorRef.current);
+        const payload = await pollOverlay(token, cursorRef.current);
         cursorRef.current = payload.nextCursor;
         if (payload.events.length > 0) {
           queueRef.current.push(...payload.events);
@@ -82,12 +105,11 @@ export function OverlayPage() {
       }
     }, POLL_MS);
     return () => window.clearInterval(timer);
-  }, [streamerId, processQueue]);
+  }, [token, processQueue]);
 
   return (
-    <section>
-      <h1>Overlay Preview</h1>
-      <div className={`overlayCard overlay-card${visible ? " overlay-card--visible" : ""}`}>
+    <div className="overlay-container">
+      <div className={`overlay-card${visible ? " overlay-card--visible" : ""}`}>
         {current && (
           <>
             <div className="overlay-sender">{current.senderName}</div>
@@ -96,6 +118,6 @@ export function OverlayPage() {
           </>
         )}
       </div>
-    </section>
+    </div>
   );
 }

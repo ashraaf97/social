@@ -1,9 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Link, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./AuthContext";
 import { AdminPage } from "./pages/AdminPage";
 import { DonatePage } from "./pages/DonatePage";
+import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { OverlayPage } from "./pages/OverlayPage";
 import { StreamerPortalPage } from "./pages/StreamerPortalPage";
@@ -20,7 +21,7 @@ function Nav() {
   const { auth, signOut } = useAuth();
   return (
     <nav>
-      <Link to="/">Donate</Link>
+      <Link to="/" className="nav-brand">StreamDonate</Link>
       {auth ? (
         <>
           {auth.role === "ADMIN" && <Link to="/admin">Admin Portal</Link>}
@@ -31,8 +32,40 @@ function Nav() {
       ) : (
         <Link to="/login">Login</Link>
       )}
-      <Link to="/overlay">Overlay Preview</Link>
     </nav>
+  );
+}
+
+function AppContent() {
+  const location = useLocation();
+  const isOverlay = location.pathname === "/overlay";
+
+  return (
+    <>
+      {!isOverlay && <Nav />}
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/donate" element={<DonatePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/portal"
+          element={
+            <RequireAuth role="STREAMER">
+              <StreamerPortalPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <RequireAuth role="ADMIN">
+              <AdminPage />
+            </RequireAuth>
+          }
+        />
+        <Route path="/overlay" element={<OverlayPage />} />
+      </Routes>
+    </>
   );
 }
 
@@ -40,28 +73,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Nav />
-        <Routes>
-          <Route path="/" element={<DonatePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/portal"
-            element={
-              <RequireAuth role="STREAMER">
-                <StreamerPortalPage />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <RequireAuth role="ADMIN">
-                <AdminPage />
-              </RequireAuth>
-            }
-          />
-          <Route path="/overlay" element={<OverlayPage />} />
-        </Routes>
+        <AppContent />
       </AuthProvider>
     </BrowserRouter>
   );

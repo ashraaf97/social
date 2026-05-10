@@ -1,7 +1,9 @@
 package xyz._3.social.repository;
 
+import java.time.Instant;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,4 +18,8 @@ public interface OverlayEventRepository extends JpaRepository<OverlayEvent, Long
             @Param("streamerId") String streamerId,
             @Param("cursor") long cursor,
             @Param("limit") long limit);
+
+    @Modifying
+    @Query("DELETE FROM OverlayEvent e WHERE e.createdAt < :threshold")
+    void deleteOldEvents(@Param("threshold") Instant threshold);
 }

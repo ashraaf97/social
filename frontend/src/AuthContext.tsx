@@ -4,6 +4,8 @@ import { logout as apiLogout } from "./api";
 type AuthState = {
   token: string;
   streamerId: string;
+  overlayToken: string;
+  donationToken: string;
   role: string;
 };
 

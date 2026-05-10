@@ -12,6 +12,13 @@ export type AuthResponse = {
   token: string;
   role: string;
   streamerId: string;
+  overlayToken: string;
+  donationToken: string;
+};
+
+export type DonationStreamer = {
+  streamerId: string;
+  username: string;
 };
 
 export type StreamerProfile = {
@@ -38,7 +45,7 @@ export type OverlayPollResult = {
 };
 
 export type CreateDonationPayload = {
-  streamerId?: string;
+  donationToken: string;
   senderName: string;
   amount: number;
   currency: string;

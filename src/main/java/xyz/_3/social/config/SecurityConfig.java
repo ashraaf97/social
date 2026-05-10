@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/overlay/events").permitAll()
                         .requestMatchers("/api/v1/overlay/tts/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/donations").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/donations/streamer").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/donations/*/mark-paid").permitAll()
                         .requestMatchers("/overlay.html", "/", "/favicon.ico").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")

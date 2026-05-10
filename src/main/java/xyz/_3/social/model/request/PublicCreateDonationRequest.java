@@ -6,8 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
-public record CreateDonationRequest(
-        @NotBlank String streamerId,
+public record PublicCreateDonationRequest(
+        @NotBlank String donationToken,
         @NotBlank @Size(max = 120) String senderName,
         @NotNull @DecimalMin(value = "0.01") BigDecimal amount,
         @NotBlank @Size(max = 16) String currency,

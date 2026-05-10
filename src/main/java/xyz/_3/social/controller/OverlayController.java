@@ -25,12 +25,12 @@ public class OverlayController {
 
     @GetMapping("/events")
     public OverlayPollResponse poll(
-            @RequestParam String streamerId,
+            @RequestParam String token,
             @RequestParam(defaultValue = "0") long cursor,
             @RequestParam(defaultValue = "10") long limit
     ) {
         long safeLimit = Math.min(50, Math.max(1, limit));
-        List<OverlayEventResponse> events = overlayService.pollEvents(streamerId, cursor, safeLimit)
+        List<OverlayEventResponse> events = overlayService.pollEventsByToken(token, cursor, safeLimit)
                 .stream()
                 .map(overlayWebMapper::toOverlayEventResponse)
                 .toList();

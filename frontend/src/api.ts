@@ -2,6 +2,7 @@ import type {
   AuthResponse,
   CreateDonationPayload,
   Donation,
+  DonationStreamer,
   OverlayEvent,
   OverlayPollResult,
   PageResponse,
@@ -12,6 +13,7 @@ export type {
   AuthResponse,
   CreateDonationPayload,
   Donation,
+  DonationStreamer,
   OverlayEvent,
   OverlayPollResult,
   PageResponse,
@@ -55,6 +57,25 @@ export async function createDonation(payload: CreateDonationPayload): Promise<Do
   return response.json();
 }
 
+export async function fetchDonationStreamer(token: string): Promise<DonationStreamer> {
+  const response = await fetch(
+    `${baseUrl}/api/v1/donations/streamer?token=${encodeURIComponent(token)}`
+  );
+  if (!response.ok) {
+    throw new Error("Invalid donation link");
+  }
+  return response.json();
+}
+
+export async function markDonationPaid(donationId: number): Promise<void> {
+  const response = await fetch(`${baseUrl}/api/v1/donations/${donationId}/mark-paid`, {
+    method: "POST",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to mark donation as paid");
+  }
+}
+
 export async function listDonations(token: string): Promise<Donation[]> {
   const response = await fetch(`${baseUrl}/api/v1/streamer/donations`, {
     headers: bearer(token),
@@ -90,9 +111,9 @@ export async function listStreamers(
   return response.json();
 }
 
-export async function pollOverlay(streamerId: string, cursor: number): Promise<OverlayPollResult> {
+export async function pollOverlay(token: string, cursor: number): Promise<OverlayPollResult> {
   const response = await fetch(
-    `${baseUrl}/api/v1/overlay/events?streamerId=${encodeURIComponent(streamerId)}&cursor=${cursor}`
+    `${baseUrl}/api/v1/overlay/events?token=${encodeURIComponent(token)}&cursor=${cursor}`
   );
   if (!response.ok) {
     throw new Error("Failed to poll overlay events");

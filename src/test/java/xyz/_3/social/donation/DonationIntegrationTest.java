@@ -18,7 +18,6 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.elevenlabs.ElevenLabsTextToSpeechModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -61,9 +60,6 @@ class DonationIntegrationTest {
 
     @MockitoBean
     private AiReaderService aiReaderService;
-
-    @MockitoBean
-    private ElevenLabsTextToSpeechModel elevenLabsTextToSpeechModel;
 
     private MockMvc mockMvc;
 

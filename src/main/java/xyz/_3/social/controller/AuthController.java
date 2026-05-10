@@ -60,6 +60,6 @@ public class AuthController {
                 user.getUsername(),
                 jwtService.extractExpiration(token)
         );
-        return new AuthResponse(token, user.getRole(), user.getStreamerId());
+        return new AuthResponse(token, user.getRole(), user.getStreamerId(), user.getOverlayToken(), user.getDonationToken());
     }
 }
