@@ -30,5 +30,7 @@ public class User {
     private String streamerId;
     private String overlayToken;
     private String donationToken;
+    @Enumerated(EnumType.STRING)
+    private OverlayPosition overlayPosition;
     private Instant createdAt;
 }

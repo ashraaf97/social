@@ -62,3 +62,17 @@ export type PageResponse<T> = {
   hasNext: boolean;
   hasPrevious: boolean;
 };
+
+export const OVERLAY_POSITION_VALUES = [
+  "CENTER",
+  "TOP",
+  "BOTTOM",
+  "LEFT",
+  "RIGHT",
+  "TOP_LEFT",
+  "TOP_RIGHT",
+  "BOTTOM_LEFT",
+  "BOTTOM_RIGHT",
+] as const;
+
+export type OverlayPositionValue = (typeof OVERLAY_POSITION_VALUES)[number];

@@ -1,5 +1,6 @@
 package xyz._3.social.service;
 
+import jakarta.transaction.Transactional;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
@@ -15,9 +16,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import xyz._3.social.config.AdminProperties;
+import xyz._3.social.model.OverlayPosition;
 import xyz._3.social.model.User;
 import xyz._3.social.model.UserRole;
 import xyz._3.social.model.request.SignUpRequest;
+import xyz._3.social.model.response.OverlaySettingsResponse;
 import xyz._3.social.model.response.PageResponse;
 import xyz._3.social.model.response.StreamerProfileResponse;
 import xyz._3.social.repository.UserRepository;
@@ -55,6 +58,7 @@ public class UserService implements UserDetailsService, ApplicationRunner {
                 request.username(),
                 generateSecureToken(),
                 generateSecureToken(),
+                OverlayPosition.CENTER,
                 Instant.now()
         );
         return userRepository.save(user);
@@ -103,6 +107,7 @@ public class UserService implements UserDetailsService, ApplicationRunner {
                 null,
                 null,
                 null,
+                OverlayPosition.CENTER,
                 Instant.now()
         );
         userRepository.save(admin);
@@ -122,8 +127,40 @@ public class UserService implements UserDetailsService, ApplicationRunner {
                 username,
                 generateSecureToken(),
                 generateSecureToken(),
+                OverlayPosition.CENTER,
                 Instant.now()
         );
         userRepository.save(streamer);
+    }
+
+    public OverlaySettingsResponse getOverlaySettingsByOverlayToken(String overlayToken) {
+        final User user = userRepository.findByOverlayToken(overlayToken)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid overlay token"));
+        return new OverlaySettingsResponse(user.getOverlayPosition().name());
+    }
+
+    public OverlaySettingsResponse getOverlaySettingsForStreamer(String streamerId) {
+        final User user = userRepository.findByStreamerId(streamerId)
+                .orElseThrow(() -> new IllegalArgumentException("Streamer not found"));
+        return new OverlaySettingsResponse(user.getOverlayPosition().name());
+    }
+
+    @Transactional
+    public OverlaySettingsResponse updateOverlaySettingsForStreamer(String streamerId, OverlayPosition position) {
+        final User user = userRepository.findByStreamerId(streamerId)
+                .orElseThrow(() -> new IllegalArgumentException("Streamer not found"));
+        userRepository.save(new User(
+                user.getId(),
+                user.getUsername(),
+                user.getPasswordHash(),
+                user.getEmail(),
+                user.getRole(),
+                user.getStreamerId(),
+                user.getOverlayToken(),
+                user.getDonationToken(),
+                position,
+                user.getCreatedAt()
+        ));
+        return new OverlaySettingsResponse(position.name());
     }
 }

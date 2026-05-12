@@ -1,24 +1,31 @@
 package xyz._3.social.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import xyz._3.social.mapper.StreamerWebMapper;
+import xyz._3.social.model.OverlayPosition;
 import xyz._3.social.model.UserRole;
+import xyz._3.social.model.request.UpdateOverlaySettingsRequest;
+import xyz._3.social.model.response.OverlaySettingsResponse;
 import xyz._3.social.model.response.StreamerDonationResponse;
 import xyz._3.social.model.response.StreamerSummaryResponse;
 import xyz._3.social.security.AuthenticatedUser;
 import xyz._3.social.service.StreamerPortalService;
+import xyz._3.social.service.UserService;
 
 @RequiredArgsConstructor
 @RestController
@@ -27,6 +34,7 @@ public class StreamerPortalController {
 
     private final StreamerPortalService streamerPortalService;
     private final StreamerWebMapper streamerWebMapper;
+    private final UserService userService;
 
     @GetMapping("/donations")
     public List<StreamerDonationResponse> listDonations(
@@ -60,6 +68,31 @@ public class StreamerPortalController {
     ) {
         String resolvedId = resolveStreamerId(currentUser, streamerId);
         streamerPortalService.replayDonation(resolvedId, donationId);
+    }
+
+    @GetMapping("/overlay-settings")
+    public OverlaySettingsResponse getOverlaySettings(
+            @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @RequestParam(required = false) String streamerId
+    ) {
+        final String resolvedId = resolveStreamerId(currentUser, streamerId);
+        return userService.getOverlaySettingsForStreamer(resolvedId);
+    }
+
+    @PutMapping("/overlay-settings")
+    public OverlaySettingsResponse updateOverlaySettings(
+            @AuthenticationPrincipal AuthenticatedUser currentUser,
+            @RequestParam(required = false) String streamerId,
+            @Valid @RequestBody UpdateOverlaySettingsRequest body
+    ) {
+        final String resolvedId = resolveStreamerId(currentUser, streamerId);
+        final OverlayPosition position;
+        try {
+            position = OverlayPosition.valueOf(body.position().trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid overlay position");
+        }
+        return userService.updateOverlaySettingsForStreamer(resolvedId, position);
     }
 
     @GetMapping("/overlay-url")

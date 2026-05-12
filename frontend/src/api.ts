@@ -121,6 +121,45 @@ export async function pollOverlay(token: string, cursor: number): Promise<Overla
   return response.json();
 }
 
+export type OverlayConfig = {
+  position: string;
+};
+
+export async function fetchOverlayConfig(overlayToken: string): Promise<OverlayConfig> {
+  const response = await fetch(
+    `${baseUrl}/api/v1/overlay/config?token=${encodeURIComponent(overlayToken)}`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to load overlay layout");
+  }
+  return response.json();
+}
+
+export async function getStreamerOverlaySettings(jwt: string): Promise<OverlayConfig> {
+  const response = await fetch(`${baseUrl}/api/v1/streamer/overlay-settings`, {
+    headers: bearer(jwt),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to load overlay settings");
+  }
+  return response.json();
+}
+
+export async function updateStreamerOverlaySettings(
+  jwt: string,
+  position: string
+): Promise<OverlayConfig> {
+  const response = await fetch(`${baseUrl}/api/v1/streamer/overlay-settings`, {
+    method: "PUT",
+    headers: { ...bearer(jwt), "Content-Type": "application/json" },
+    body: JSON.stringify({ position }),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to save overlay position");
+  }
+  return response.json();
+}
+
 export async function fetchTtsAudio(donationId: number): Promise<string | null> {
   const response = await fetch(`${baseUrl}/api/v1/overlay/tts/${donationId}`);
   if (!response.ok) return null;

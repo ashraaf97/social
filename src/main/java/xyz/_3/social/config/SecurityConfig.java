@@ -47,6 +47,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/auth/signup", "/auth/login", "/auth/logout").permitAll()
                         .requestMatchers("/api/v1/overlay/events").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/overlay/config").permitAll()
                         .requestMatchers("/api/v1/overlay/tts/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/donations").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/donations/streamer").permitAll()

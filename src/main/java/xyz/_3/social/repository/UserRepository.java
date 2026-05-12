@@ -13,6 +13,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
     Optional<User> findByOverlayToken(String overlayToken);
     Optional<User> findByDonationToken(String donationToken);
+    Optional<User> findByStreamerId(String streamerId);
     Page<User> findByRole(UserRole role, Pageable pageable);
     boolean existsByUsername(String username);
 }

@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 import xyz._3.social.mapper.OverlayWebMapper;
 import xyz._3.social.model.response.OverlayEventResponse;
 import xyz._3.social.model.response.OverlayPollResponse;
+import xyz._3.social.model.response.OverlaySettingsResponse;
 import xyz._3.social.repository.TtsAudioRepository;
 import xyz._3.social.service.OverlayService;
+import xyz._3.social.service.UserService;
 
 @AllArgsConstructor
 @RestController
@@ -22,6 +24,12 @@ public class OverlayController {
     private final OverlayService overlayService;
     private final OverlayWebMapper overlayWebMapper;
     private final TtsAudioRepository ttsAudioRepository;
+    private final UserService userService;
+
+    @GetMapping("/config")
+    public OverlaySettingsResponse getOverlayConfig(@RequestParam String token) {
+        return userService.getOverlaySettingsByOverlayToken(token);
+    }
 
     @GetMapping("/events")
     public OverlayPollResponse poll(

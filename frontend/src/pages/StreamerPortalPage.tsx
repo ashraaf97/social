@@ -1,13 +1,21 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../AuthContext";
-import { listDonations, replayDonation } from "../api";
-import type { Donation } from "../models";
+import {
+  getStreamerOverlaySettings,
+  listDonations,
+  replayDonation,
+  updateStreamerOverlaySettings,
+} from "../api";
+import { OverlayPositionPicker, parseOverlayPosition } from "../components/OverlayPositionPicker";
+import type { Donation, OverlayPositionValue } from "../models";
 
 export function StreamerPortalPage() {
   const { auth } = useAuth();
   const [donations, setDonations] = useState<Donation[]>([]);
   const [status, setStatus] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [overlayPosition, setOverlayPosition] = useState<OverlayPositionValue>("CENTER");
+  const [savingLayout, setSavingLayout] = useState(false);
   const itemsPerPage = 10;
 
   async function load() {
@@ -33,6 +41,27 @@ export function StreamerPortalPage() {
     void load();
   }, []);
 
+  useEffect(() => {
+    if (!auth?.token) return;
+    void getStreamerOverlaySettings(auth.token)
+      .then(c => setOverlayPosition(parseOverlayPosition(c.position)))
+      .catch(() => {});
+  }, [auth?.token]);
+
+  async function handleOverlayPositionChange(next: OverlayPositionValue) {
+    if (!auth?.token) return;
+    setOverlayPosition(next);
+    setSavingLayout(true);
+    try {
+      await updateStreamerOverlaySettings(auth.token, next);
+      setStatus("Overlay position saved — refresh OBS browser source if it was already open.");
+    } catch {
+      setStatus("Failed to save overlay position");
+    } finally {
+      setSavingLayout(false);
+    }
+  }
+
   const overlayUrl = `/overlay?token=${auth!.overlayToken}`;
   const donateUrl = `/donate?token=${auth!.donationToken}`;
 
@@ -45,6 +74,12 @@ export function StreamerPortalPage() {
   return (
     <section>
       <h1>Streamer Portal</h1>
+
+      <OverlayPositionPicker
+        value={overlayPosition}
+        onChange={handleOverlayPositionChange}
+        disabled={savingLayout}
+      />
 
       <div className="link-box">
         <h3>Your Donation Link</h3>

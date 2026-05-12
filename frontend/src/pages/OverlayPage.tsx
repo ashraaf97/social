@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fetchTtsAudio, pollOverlay } from "../api";
-import type { OverlayEvent } from "../models";
+import { fetchOverlayConfig, fetchTtsAudio, pollOverlay } from "../api";
+import { parseOverlayPosition } from "../components/OverlayPositionPicker";
+import type { OverlayEvent, OverlayPositionValue } from "../models";
 
 const POLL_MS = 1500;
+const CONFIG_REFRESH_MS = 10_000;
 const TTS_MAX_WAIT_MS = 12_000;
 const TTS_RETRY_MS = 1_000;
 const CARD_FALLBACK_MS = 7_000;
@@ -31,6 +33,10 @@ function delay(ms: number) {
   return new Promise<void>(r => setTimeout(r, ms));
 }
 
+function positionToContainerClass(position: OverlayPositionValue): string {
+  return `overlay-container--${position.toLowerCase().replace(/_/g, "-")}`;
+}
+
 export function OverlayPage() {
   const token = new URLSearchParams(window.location.search).get("token") ?? "";
 
@@ -41,30 +47,7 @@ export function OverlayPage() {
 
   const [current, setCurrent] = useState<OverlayEvent | null>(null);
   const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    document.body.classList.add("overlay-mode");
-    return () => {
-      document.body.classList.remove("overlay-mode");
-    };
-  }, []);
-
-  useEffect(() => {
-    async function initializeCursor() {
-      try {
-        const payload = await pollOverlay(token, 0);
-        cursorRef.current = payload.nextCursor;
-        if (payload.events.length > 0) {
-          queueRef.current.push(...payload.events);
-        }
-        initializedRef.current = true;
-        void processQueue();
-      } catch {
-        initializedRef.current = true;
-      }
-    }
-    void initializeCursor();
-  }, [token, processQueue]);
+  const [layoutPosition, setLayoutPosition] = useState<OverlayPositionValue>("CENTER");
 
   const processQueue = useCallback(async () => {
     if (processingRef.current || queueRef.current.length === 0) return;
@@ -94,9 +77,48 @@ export function OverlayPage() {
   }, []);
 
   useEffect(() => {
+    document.body.classList.add("overlay-mode");
+    return () => {
+      document.body.classList.remove("overlay-mode");
+    };
+  }, []);
+
+  useEffect(() => {
+    async function refreshLayout() {
+      if (!token) return;
+      try {
+        const cfg = await fetchOverlayConfig(token);
+        setLayoutPosition(parseOverlayPosition(cfg.position));
+      } catch {
+        // keep previous layout
+      }
+    }
+    void refreshLayout();
+    const timer = window.setInterval(refreshLayout, CONFIG_REFRESH_MS);
+    return () => window.clearInterval(timer);
+  }, [token]);
+
+  useEffect(() => {
+    async function initializeCursor() {
+      try {
+        const payload = await pollOverlay(token, 0);
+        cursorRef.current = payload.nextCursor;
+        if (payload.events.length > 0) {
+          queueRef.current.push(...payload.events);
+        }
+        initializedRef.current = true;
+        void processQueue();
+      } catch {
+        initializedRef.current = true;
+      }
+    }
+    void initializeCursor();
+  }, [token, processQueue]);
+
+  useEffect(() => {
     const timer = window.setInterval(async () => {
       if (!initializedRef.current) return;
-      
+
       try {
         const payload = await pollOverlay(token, cursorRef.current);
         cursorRef.current = payload.nextCursor;
@@ -112,12 +134,14 @@ export function OverlayPage() {
   }, [token, processQueue]);
 
   return (
-    <div className="overlay-container">
+    <div className={`overlay-container ${positionToContainerClass(layoutPosition)}`}>
       <div className={`overlay-card${visible ? " overlay-card--visible" : ""}`}>
         {current && (
           <>
             <div className="overlay-sender">{current.senderName}</div>
-            <div className="overlay-amount">{current.amount} {current.currency}</div>
+            <div className="overlay-amount">
+              {current.amount} {current.currency}
+            </div>
             <div className="overlay-message">{current.messageText}</div>
           </>
         )}
