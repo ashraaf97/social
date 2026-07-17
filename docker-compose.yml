@@ -26,10 +26,8 @@ services:
       # Non-secret service wiring (postgres host is the compose service name)
       APP_JDBC_URL: jdbc:postgresql://postgres:5432/social
       APP_FLYWAY_URL: jdbc:postgresql://postgres:5432/social
-      # Infisical Machine Identity + project config (secrets are injected by Infisical at runtime)
-      INFISICAL_MACHINE_CLIENT_ID: ${INFISICAL_MACHINE_CLIENT_ID}
-      INFISICAL_MACHINE_CLIENT_SECRET: ${INFISICAL_MACHINE_CLIENT_SECRET}
-      PROJECT_ID: ${PROJECT_ID}
+      # Infisical service token (secrets are injected by Infisical at runtime)
+      INFISICAL_TOKEN: ${INFISICAL_TOKEN}
       INFISICAL_API_URL: ${INFISICAL_API_URL:-https://app.infisical.com/api}
       INFISICAL_SECRET_ENV: ${INFISICAL_SECRET_ENV:-dev}
     ports:
