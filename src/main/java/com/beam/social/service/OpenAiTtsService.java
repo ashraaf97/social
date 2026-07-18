@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-import com.beam.social.config.ElevenLabsProperties;
+import com.beam.social.config.OpenAiProperties;
 import com.beam.social.model.Donation;
 import com.beam.social.model.TtsAudio;
 import com.beam.social.model.TtsStatus;
@@ -18,10 +18,10 @@ import com.beam.social.repository.TtsAudioRepository;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@ConditionalOnExpression("'${app.tts.provider:elevenlabs}' == 'elevenlabs' && '${app.elevenlabs.api-key:}'.length() > 0")
-public class ElevenLabsAiReaderService implements AiReaderService {
+@ConditionalOnExpression("'${app.tts.provider:elevenlabs}' == 'openai' && '${app.openai.api-key:}'.length() > 0")
+public class OpenAiTtsService implements AiReaderService {
 
-    private final ElevenLabsProperties properties;
+    private final OpenAiProperties properties;
     private final TtsAudioRepository ttsAudioRepository;
 
     private RestClient restClient;
@@ -33,31 +33,27 @@ public class ElevenLabsAiReaderService implements AiReaderService {
             final byte[] audio = synthesize(donation);
             ttsAudioRepository.save(new TtsAudio(donation.getId(), audio, Instant.now()));
             statusUpdater.accept(TtsStatus.COMPLETED);
-            log.info("ElevenLabs TTS completed for donation {} ({} bytes)", donation.getId(), audio.length);
+            log.info("OpenAI TTS completed for donation {} ({} bytes)", donation.getId(), audio.length);
         } catch (Exception e) {
-            log.error("ElevenLabs TTS failed for donation {}: {}", donation.getId(), e.getMessage(), e);
+            log.error("OpenAI TTS failed for donation {}: {}", donation.getId(), e.getMessage(), e);
             statusUpdater.accept(TtsStatus.FAILED);
         }
     }
 
     private byte[] synthesize(Donation donation) {
-        final String voiceId = resolveVoiceId(donation);
+        final String voice = resolveVoice(donation);
         final String text = TtsSpeechFormatter.buildSpeechText(donation);
 
         final Map<String, Object> body = Map.of(
-                "text", text,
-                "model_id", properties.modelId(),
-                "voice_settings", Map.of(
-                        "stability", 0.5,
-                        "similarity_boost", 0.75
-                )
+                "model", properties.model(),
+                "voice", voice,
+                "input", text
         );
 
         return restClient()
                 .post()
-                .uri("/v1/text-to-speech/{voiceId}?output_format=mp3_44100_128", voiceId)
-                .header("xi-api-key", properties.apiKey())
-                .header("Accept", "audio/mpeg")
+                .uri("/v1/audio/speech")
+                .header("Authorization", "Bearer " + properties.apiKey())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(body)
                 .retrieve()
@@ -73,11 +69,11 @@ public class ElevenLabsAiReaderService implements AiReaderService {
         return restClient;
     }
 
-    private String resolveVoiceId(Donation donation) {
+    private String resolveVoice(Donation donation) {
         final String donationVoice = donation.getVoiceProfile();
         if (donationVoice != null && !donationVoice.isBlank()) {
             return donationVoice.trim();
         }
-        return properties.voiceId();
+        return properties.voice();
     }
 }

@@ -93,7 +93,8 @@
 		</dependency>
 
 		<!--
-		  ElevenLabs TTS disabled - NoopAiReaderService will handle all TTS requests.
+		  Spring AI ElevenLabs starter is intentionally disabled; TTS is handled by
+		  ElevenLabsAiReaderService (default) or OpenAiTtsService via plain RestClient.
 		  Uncomment when Spring AI becomes compatible with Spring Boot 4.x.
 		-->
 		<!--
